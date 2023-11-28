@@ -85,6 +85,18 @@ class Cell {
     //   this.width * (mas + booMas),
     //   this.height * (mas + booMas)
     // );
+  
+    if(this.block) {
+      ctx.fillStyle = 'black'
+      ctx.fillRect(
+            this.x * (mas + booMas) + offsetX,
+      this.y * (mas + booMas) + offsetY,
+      this.width * (mas + booMas),
+      this.height * (mas + booMas)
+      );
+    }
+
+
     if (this.item) {
       this.item.draw();
     }

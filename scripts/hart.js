@@ -10,7 +10,7 @@ window.addEventListener("mousemove", (e) => {
 });
 
 window.addEventListener("mousedown", (e) => {
-  if (!gameField.checkStatus && !gameField.case) {
+  if ( !gameField.userStop) {
     gameField.fieldCollision(cursor);
     gameField.focusCell
       ? (gameField.click = {
@@ -31,11 +31,7 @@ window.addEventListener("mouseup", (e) => {
   }
 });
 
-let hh = 0;
-let hhK = false;
-window.addEventListener("keydown", () => {
-  //  hhK = true
-});
+
 
 function updateMas() {
   mas = clientHeight / 600 - hh;
@@ -121,20 +117,34 @@ function baseFoneDraw() {
   ctx.globalAlpha = 1;
 }
 
+let pausa = false;
+let hh = 0;
+let hhK = false;
+window.addEventListener("keydown", () => {
+  //  hhK = true
+  pausa = !pausa
+});
+
+
 setInterval(() => {
   ctx.clearRect(0, 0, width, height);
   baseFoneDraw();
-  // ctx.strokeStyle = "black";
-  // ctx.strokeRect(0, 0, width, height);
-  gameField.caseOrder();
-  gameField.itemsMove();
   updateMas();
+
+if(!pausa) {
+  gameField.caseOrder();
   gameField.cellsItemsMove();
   gameField.destroyOrder();
   gameField.booOrder();
+ // gameField.leftRightUpdate();
   gameField.controller();
+  gameField.itemsColumsMove();
+ gameField.itemsMove();
+ gameField.leftRightUpdate();
   gameField.rocketsOrder();
+}
 
+  
   gameField.draw();
 
   gameField.drawBoo();

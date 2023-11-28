@@ -30,12 +30,16 @@ class GameField {
     this.rockets = [];
     this.rocketsOnDraw = [];
     this.userMove = false;
+    this.columnCellsOnMove = [];
+    this.threeInLine = [];
+    this.userStop = 0;
   }
-  controller() {
+
+  controller() { // old ok
     if (!this.case && !this.rockets.length) {
       if (
         this.checkStatus === "getThreeInLine" &&
-        this.threeInLine.length &&
+        //this.threeInLine.length &&
         !this.itemsOnMove.length
       ) {
         this.getGroops();
@@ -48,46 +52,93 @@ class GameField {
         });
         this.userMove = false;
         this.checkStatus = "columnsComplite";
-      } else if (
+      }  if (
         this.checkStatus === "columnsComplite" &&
         !this.onDestroy.length &&
         !this.drawAreaA.length
       ) {
         this.columnsUpdate();
         this.checkStatus = "getThreeInLine";
-      } else if (
+      }   if (
         !this.threeInLine.length &&
         !this.itemsOnMove.length &&
         !this.onDestroy.length &&
-        !this.drawAreaA.length
+        !this.drawAreaA.length &&
+        this.checkStatus
       ) {
-        this.checkStatus = "";
-      }
+        this.checkStatus = "checkLR"
+         //this.leftRightUpdate();
+        // this.columnCellsOnMove.length ? this.checkStatus = "checkLR" : this.checkStatus = ''
+
+      } 
     }
   }
-  itemsMove() {
-    let go = false;
-    this.cellsArrey.forEach((cell) => {
-      if (cell.item && cell.item.y < cell.y) {
-        go = true;
-      }
-    });
-    if (go) {
-      for (let i = 0; i < this.itemsOnMove.length; i++) {
-        const item = this.itemsOnMove[i];
-        const cell = item.cell;
 
+  // controller() { // old ok
+  //   if (!this.case && !this.rockets.length) {
+  //     if (
+  //       this.checkStatus === "getThreeInLine" &&
+  //       this.threeInLine.length &&
+  //       !this.itemsOnMove.length
+  //     ) {
+  //       this.getGroops();
+  //       this.getThreeInLine();
+  //       this.threeInLine.forEach((obj) => {
+  //         const arg = !this.userMove ? obj.cells[0] : this.targetCell;
+  //         obj.cells.forEach((cell) => {
+  //           this.addAndingItem(cell, arg);
+  //         });
+  //       });
+  //       this.userMove = false;
+  //       this.checkStatus = "columnsComplite";
+  //     }  if (
+  //       this.checkStatus === "columnsComplite" &&
+  //       !this.onDestroy.length &&
+  //       !this.drawAreaA.length
+  //     ) {
+  //       this.columnsUpdate();
+  //       this.checkStatus = "getThreeInLine";
+  //     }  if (
+  //       !this.threeInLine.length &&
+  //       !this.itemsOnMove.length &&
+  //       !this.onDestroy.length &&
+  //       !this.drawAreaA.length &&
+  //       this.checkStatus
+  //     ) {
+  //       console.log('here update')
+  //       this.checkStatus = "";
+  //     }
+  //   }
+  // }
+
+  itemsMove() {
+    // let go = false;
+    // this.cellsArrey.forEach((cell) => {
+    //   if (cell.item && cell.item.y < cell.y) {
+    //     go = true;
+    //   }
+    // });
+    //   if (go) {
+    for (let i = 0; i < this.itemsOnMove.length; i++) {
+      const item = this.itemsOnMove[i];
+      if(item.x === item.cell.x) {
+        const cell = item.cell;
         item.awatMove--;
         if (item.awatMove <= 0) {
           item.y += this.gabsrit / 3;
           if (item.y >= cell.y) {
             item.y = cell.y;
             this.itemsOnMove.splice(i, 1);
+            item.cell.column.itemsOnMove.splice(item.cell.column.itemsOnMove.indexOf(item), 1)
             i--;
           }
         }
       }
     }
+    //  }
+    //  else {
+    //   this.itemsOnMove = []
+    // }
   }
 
   getValidTypes(cell, fare) {
@@ -102,7 +153,7 @@ class GameField {
     return validTypes;
   }
 
-  columnsUpdate() {
+  columnsUpdate(column) {
     // this.getGroops();
     //this.getThreeInLine();
     this.crash++;
@@ -111,7 +162,49 @@ class GameField {
     //  if(!fare) {
     //   console.log('fare-ramdom')
     // }
-    this.columnsArr.forEach((column) => {
+    if (!column) {
+      this.columnsArr.forEach((column) => {
+        const items = [];
+        column.cells.forEach((cell) => {
+          if (cell.item) {
+            items.push(cell.item);
+            cell.item = null;
+          }
+        });
+        let newItemNum = 1;
+        let itemNum = 0;
+        for (let i = column.cells.length - 1; i >= 0; i--) {
+          const cell = column.cells[i];
+          const item = items[items.length - 1];
+          if (item) {
+            item.cell = cell;
+            cell.item = item;
+            item.awatMove = itemNum * 2;
+            itemNum++;
+            if (item.y !== item.cell.y) {
+              this.itemsOnMove.push(item);
+            }
+            items.pop();
+          } else if (column.bornCell) {
+            const newItem = new Item(cell, this.getValidTypes(cell, fare));
+            newItem.newAnim = true;
+            const ran = Math.floor(Math.random() * 30);
+            if (!ran) {
+              newItem.special = true;
+              newItem.type =
+                busters[Math.floor(Math.random() * busters.length)];
+            }
+            cell.item = newItem;
+            newItem.y = -this.gabsrit * newItemNum;
+            newItem.awatMove = (newItemNum + itemNum) * 2;
+            this.itemsOnMove.push(newItem);
+            newItemNum++;
+            //cell.item = null;
+          }
+        }
+        //console.log(items[items.length - 1].type)
+      });
+    } else {
       const items = [];
       column.cells.forEach((cell) => {
         if (cell.item) {
@@ -127,13 +220,13 @@ class GameField {
         if (item) {
           item.cell = cell;
           cell.item = item;
-          item.awatMove = itemNum * 2;
+          item.awatMove = 0//itemNum * 2;
           itemNum++;
           if (item.y !== item.cell.y) {
             this.itemsOnMove.push(item);
           }
           items.pop();
-        } else {
+        } else if (column.bornCell) {
           const newItem = new Item(cell, this.getValidTypes(cell, fare));
           newItem.newAnim = true;
           const ran = Math.floor(Math.random() * 30);
@@ -143,14 +236,13 @@ class GameField {
           }
           cell.item = newItem;
           newItem.y = -this.gabsrit * newItemNum;
-          newItem.awatMove = (newItemNum + itemNum) * 2;
+          newItem.awatMove = 0//(newItemNum + itemNum) * 2;
           this.itemsOnMove.push(newItem);
           newItemNum++;
           //cell.item = null;
         }
       }
-      //console.log(items[items.length - 1].type)
-    });
+    }
     // console.log(this.itemsOnMove);
   }
   drawBoo() {
@@ -193,7 +285,6 @@ class GameField {
       for (let i = 0; i < this.onDestroy.length; i++) {
         const desItem = this.onDestroy[i];
         if (!desItem.awaitDestroy) {
-
           if (
             scorePoints &&
             !desItem.item.special &&
@@ -201,8 +292,8 @@ class GameField {
           ) {
             //console.log('here')
             scorePoints[desItem.item.type].items.push(desItem.item);
-          } else if(!desItem.item.special){
-            scorePoints.onDestroy.unshift(desItem.item)
+          } else if (!desItem.item.special) {
+            scorePoints.onDestroy.unshift(desItem.item);
           }
 
           desItem.item.type !== "hor" && desItem.item.type !== "ver"
@@ -393,6 +484,7 @@ class GameField {
         : false;
     }
     this.click = null;
+    this.userStop = true;
   }
   getThreeInLine() {
     this.threeInLine = [];
@@ -460,23 +552,49 @@ class GameField {
         cell.item && !cell.item.special && this.rec(cell);
       })
     );
+   // console.log(this.groops)
+   
   }
 
   getColumns() {
     this.columnsArr = [];
     for (let i = 0; i < this.columns; i++) {
-      this.columnsArr.push({ cells: [] });
+      this.columnsArr.push({ cells: [], itemsOnMove: [] });
       for (let k = 0; k < this.lines; k++) {
         if (this.cells[k][i].block) {
-          break;
+          if (this.cells[k][i].down && !this.cells[k][i].down.block) {
+            this.columnsArr.push({ cells: [], itemsOnMove: []  });
+          }
+        } else {
+          const cell = this.cells[k][i];
+          cell.column = this.columnsArr[this.columnsArr.length - 1];
+          cell.canBorn
+            ? (this.columnsArr[this.columnsArr.length - 1].bornCell = cell)
+            : false;
+          this.columnsArr[this.columnsArr.length - 1].cells.push(cell);
         }
-        const cell = this.cells[k][i];
-        cell.canBorn ? (this.columnsArr[i].bornCell = cell) : false;
-        this.columnsArr[i].cells.push(cell);
       }
     }
-    // console.log(this.columnsArr)
+    this.columnsArr = this.columnsArr.filter((column) => column.cells.length);
+   // console.log(this.columnsArr);
   }
+
+  // getColumns() { // ok!!!!
+  //   this.columnsArr = [];
+  //   for (let i = 0; i < this.columns; i++) {
+  //     this.columnsArr.push({ cells: [] });
+  //     for (let k = 0; k < this.lines; k++) {
+  //       if (this.cells[k][i].block) {
+  //         break;
+  //       }
+  //       const cell = this.cells[k][i];
+  //       cell.canBorn ? (this.columnsArr[i].bornCell = cell) : false;
+  //       this.columnsArr[i].cells.push(cell);
+  //     }
+  //   }
+  //   // console.log(this.columnsArr)
+  // }
+
   fieldCollision(cursor) {
     const x = this.x * (mas + booMas) + offsetX;
     const y = this.y * (mas + booMas) + offsetY;
@@ -518,6 +636,8 @@ class GameField {
       line.forEach((cell) => cell.draw());
     });
   }
+
+
   fieldInit() {
     this.cells = [];
     for (let i = 0; i < this.lines; i++) {
@@ -529,9 +649,23 @@ class GameField {
         );
         cell.i = i;
         cell.k = k;
-        // if (i === 3 && k === 3) {
-        //   cell.block = true;
-        // }
+        if (
+          //  (i === 0 &&
+          //   k === 3
+          //  )
+          //  ||
+          (i === 0 && k === 0) ||
+          (i === 0 && k === 1) ||
+          (i === 0 && k === 2) ||
+          (i === 0 && k === 3) ||
+          (i === 0 && k === 5) ||
+          (i === 1 && k === 0) ||
+          (i === 0 && k === 7) ||
+          (i === 0 && k === 6) ||
+          (i === 1 && k === 7)
+        ) {
+          cell.block = true;
+        }
         !i && !cell.block ? (cell.canBorn = true) : false;
         this.cells[i].push(cell);
         this.cellsArrey.push(cell);
@@ -540,16 +674,21 @@ class GameField {
 
     // this.cells.forEach((line, i) =>
     //   line.forEach((cell, k) => {
-    //     let type = colorsData[userField[i][k]];
-    //     if(type) {
-    //       if (type !== "z") {
-    //         const item = new Item(cell, types, type);
-    //         cell.item = item;
-    //       } else {
-    //         const buster = new Item(cell, busters);
-    //         buster.special = true;
-    //         cell.item = buster;
-    //         // console.log(buster)
+    //     if (userField[i][k] === "w") {
+    //       cell.block = true;
+    //     } else {
+    //       let type = colorsData[userField[i][k]];
+    //       if (type) {
+    //       //  console.log(type);
+    //         if (type && type !== "z") {
+    //           const item = new Item(cell, types, type);
+    //           cell.item = item;
+    //         } else if (type === "z") {
+    //           const buster = new Item(cell, busters);
+    //           buster.special = true;
+    //           cell.item = buster;
+    //           // console.log(buster)
+    //         }
     //       }
     //     }
     //     if (this.cells[i][k - 1]) {
@@ -571,9 +710,11 @@ class GameField {
       const bI = Math.floor(Math.random() * this.lines);
       const bK = Math.floor(Math.random() * this.columns);
       const bCell = this.cells[bI][bK];
+     if(!bCell.block) {
       const buster = new Item(bCell, busters);
       buster.special = true;
       bCell.item = buster;
+     }
     }
     // console.log(buster.type);
     this.cells.forEach((line, i) => {
@@ -618,11 +759,10 @@ class GameField {
             const index = validTypes.indexOf(this.cells[i - 2][k].item.type);
             index !== -1 && validTypes.splice(index, 1);
           }
-          //  if (i < this.lines - 1) {
+
           const item = new Item(cell, validTypes);
 
           !cell.item ? (cell.item = item) : false;
-          // }
         }
       });
     });

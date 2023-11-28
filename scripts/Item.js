@@ -1,8 +1,8 @@
 const types = ["violet", "green", "red", "blue", "yellow"];
 const busters = [
   "hor",
-  "ver",
-  "around",
+ // "ver",
+ // "around",
   // "cross"
 ];
 const around = ["left", "right", "up", "down"];

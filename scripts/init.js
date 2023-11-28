@@ -2,7 +2,7 @@ const gameField = new GameField();
 gameField.fieldInit();
 gameField.getColumns();
 gameField.getGroops();
-gameField.getPotentialThree();
+//gameField.getPotentialThree();
 
 const gab = 60;
 
