@@ -76,6 +76,78 @@ rocketGo.src = "../src/rocketGo.png";
 const aroundAnimItem = new Image();
 aroundAnimItem.src = "../src/aroundAnimItem.png";
 
+const lineUp = new Image();
+lineUp.src = "../src/lineUp.png";
+
+const lineDown = new Image();
+lineDown.src = "../src/lineDown.png";
+
+const lineLeft = new Image();
+lineLeft.src = "../src/lineLeft.png";
+
+const lineRight = new Image();
+lineRight.src = "../src/lineRight.png";
+
+const cross = new Image();
+cross.src = "../src/cross.png";
+
+const violetCross = new Image();
+violetCross.src = "../src/violetCross.png";
+
+const blueSpot = new Image();
+blueSpot.src = "../src/blueSpot.png";
+
+const fieldContur = {
+  up: {
+    image: lineUp,
+    animX: 30,
+    animY: 0,
+    aWidth: 140,
+    aHeight: 30,
+    dopX: 0,
+    dopY: -10,
+    type: "up",
+    gabX: 42,
+    gabY: 10,
+  },
+  down: {
+    image: lineDown,
+    animX: 30,
+    animY: 0,
+    aWidth: 140,
+    aHeight: 30,
+    dopX: 0,
+    dopY: 40,
+    type: "down",
+    gabX: 42,
+    gabY: 10,
+  },
+  left: {
+    image: lineLeft,
+    animX: 0,
+    animY: 30,
+    aWidth: 30,
+    aHeight: 140,
+    dopX: -8,
+    dopY: -1,
+    type: "left",
+    gabX: 10,
+    gabY: 42,
+  },
+  right: {
+    image: lineRight,
+    animX: 0,
+    animY: 30,
+    aWidth: 30,
+    aHeight: 140,
+    dopX: 40,
+    dopY: 0,
+    type: "right",
+    gabX: 10,
+    gabY: 40,
+  },
+};
+
 const images = {
   red: redBaseBoo,
   violet: violetBaseBoo,

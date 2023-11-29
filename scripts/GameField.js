@@ -29,21 +29,27 @@ class GameField {
     this.ticker = 0;
     this.rockets = [];
     this.rocketsOnDraw = [];
+    this.beams = [];
+    this.beamsOnDraw = [];
     this.userMove = false;
     this.columnCellsOnMove = [];
     this.threeInLine = [];
     this.userStop = 0;
   }
 
-  controller() { // old ok
-    if (!this.case && !this.rockets.length) {
+  controller() {
+    // old ok
+    if (!this.case && !this.rockets.length && !this.beams.length) {
       if (
         this.checkStatus === "getThreeInLine" &&
         //this.threeInLine.length &&
         !this.itemsOnMove.length
       ) {
+        // console.log("qqqqqqqqqqqqqqqqqqqqqqqqq");
+
         this.getGroops();
         this.getThreeInLine();
+        //this.userStop = !this.threeInLine.length ? true : false;
         this.threeInLine.forEach((obj) => {
           const arg = !this.userMove ? obj.cells[0] : this.targetCell;
           obj.cells.forEach((cell) => {
@@ -52,25 +58,26 @@ class GameField {
         });
         this.userMove = false;
         this.checkStatus = "columnsComplite";
-      }  if (
+      }
+      if (
         this.checkStatus === "columnsComplite" &&
         !this.onDestroy.length &&
         !this.drawAreaA.length
       ) {
         this.columnsUpdate();
         this.checkStatus = "getThreeInLine";
-      }   if (
+      }
+      if (
         !this.threeInLine.length &&
         !this.itemsOnMove.length &&
         !this.onDestroy.length &&
         !this.drawAreaA.length &&
         this.checkStatus
       ) {
-        this.checkStatus = "checkLR"
-         //this.leftRightUpdate();
+        this.checkStatus = "checkLR";
+        //this.leftRightUpdate();
         // this.columnCellsOnMove.length ? this.checkStatus = "checkLR" : this.checkStatus = ''
-
-      } 
+      }
     }
   }
 
@@ -121,7 +128,7 @@ class GameField {
     //   if (go) {
     for (let i = 0; i < this.itemsOnMove.length; i++) {
       const item = this.itemsOnMove[i];
-      if(item.x === item.cell.x) {
+      if (item.x === item.cell.x) {
         const cell = item.cell;
         item.awatMove--;
         if (item.awatMove <= 0) {
@@ -129,7 +136,10 @@ class GameField {
           if (item.y >= cell.y) {
             item.y = cell.y;
             this.itemsOnMove.splice(i, 1);
-            item.cell.column.itemsOnMove.splice(item.cell.column.itemsOnMove.indexOf(item), 1)
+            item.cell.column.itemsOnMove.splice(
+              item.cell.column.itemsOnMove.indexOf(item),
+              1
+            );
             i--;
           }
         }
@@ -220,7 +230,7 @@ class GameField {
         if (item) {
           item.cell = cell;
           cell.item = item;
-          item.awatMove = 0//itemNum * 2;
+          item.awatMove = 0; //itemNum * 2;
           itemNum++;
           if (item.y !== item.cell.y) {
             this.itemsOnMove.push(item);
@@ -236,7 +246,7 @@ class GameField {
           }
           cell.item = newItem;
           newItem.y = -this.gabsrit * newItemNum;
-          newItem.awatMove = 0//(newItemNum + itemNum) * 2;
+          newItem.awatMove = 0; //(newItemNum + itemNum) * 2;
           this.itemsOnMove.push(newItem);
           newItemNum++;
           //cell.item = null;
@@ -296,7 +306,9 @@ class GameField {
             scorePoints.onDestroy.unshift(desItem.item);
           }
 
-          desItem.item.type !== "hor" && desItem.item.type !== "ver"
+          desItem.item.type !== "hor" &&
+          desItem.item.type !== "ver" &&
+          desItem.item.type !== "cross"
             ? (desItem.item.cell.hole = {
                 alpha: 1,
                 conor: Math.random() * 2,
@@ -328,6 +340,68 @@ class GameField {
                   this.addAndingItem(cell, desItem.item.cell);
                 }
               });
+            } else if (desItem.item.type === "cross") {
+              const left = {
+                x: desItem.item.x,
+                y: desItem.item.y,
+                width: desItem.item.width,
+                height: desItem.item.height,
+                aX: 0,
+                aY: 0,
+                type: "left",
+                i: desItem.item.cell.i,
+                k: desItem.item.cell.k,
+                speed: 0,
+              };
+              const right = {
+                x: desItem.item.x,
+                y: desItem.item.y,
+                width: desItem.item.width,
+                height: desItem.item.height,
+                aX: 0,
+                aY: 0,
+                type: "right",
+                i: desItem.item.cell.i,
+                k: desItem.item.cell.k,
+                speed: 0,
+              };
+              const up = {
+                x: desItem.item.x,
+                y: desItem.item.y,
+                width: desItem.item.width,
+                height: desItem.item.height,
+                aX: 0,
+                aY: 0,
+                type: "up",
+                i: desItem.item.cell.i,
+                k: desItem.item.cell.k,
+                speed: 0,
+              };
+              const down = {
+                x: desItem.item.x,
+                y: desItem.item.y,
+                width: desItem.item.width,
+                height: desItem.item.height,
+                aX: 0,
+                aY: 0,
+                type: "down",
+                i: desItem.item.cell.i,
+                k: desItem.item.cell.k,
+                speed: 0,
+              };
+              const beamData = {
+                left,
+                right,
+                up,
+                down,
+                x: desItem.item.x,
+                y: desItem.item.y,
+                width: 1,
+                height: 1,
+                cell: desItem.item.cell,
+              };
+              this.beams.push(beamData);
+              this.beamsOnDraw.push(beamData);
             } else if (desItem.item.type === "hor") {
               const left = {
                 x: desItem.item.x,
@@ -385,7 +459,9 @@ class GameField {
             }
           }
           desItem.item.cell.item = null;
-          desItem.item.type !== "hor" && desItem.item.type !== "ver"
+          desItem.item.type !== "hor" &&
+          desItem.item.type !== "ver" &&
+          desItem.item.type !== "cross"
             ? this.onBooDraw.push(...this.onDestroy.splice(i, 1))
             : this.onDestroy.splice(i, 1);
           i--;
@@ -482,9 +558,9 @@ class GameField {
             targetCell,
           })
         : false;
+      this.userStop = true;
     }
     this.click = null;
-    this.userStop = true;
   }
   getThreeInLine() {
     this.threeInLine = [];
@@ -552,8 +628,7 @@ class GameField {
         cell.item && !cell.item.special && this.rec(cell);
       })
     );
-   // console.log(this.groops)
-   
+    // console.log(this.groops)
   }
 
   getColumns() {
@@ -563,7 +638,7 @@ class GameField {
       for (let k = 0; k < this.lines; k++) {
         if (this.cells[k][i].block) {
           if (this.cells[k][i].down && !this.cells[k][i].down.block) {
-            this.columnsArr.push({ cells: [], itemsOnMove: []  });
+            this.columnsArr.push({ cells: [], itemsOnMove: [] });
           }
         } else {
           const cell = this.cells[k][i];
@@ -576,7 +651,7 @@ class GameField {
       }
     }
     this.columnsArr = this.columnsArr.filter((column) => column.cells.length);
-   // console.log(this.columnsArr);
+    // console.log(this.columnsArr);
   }
 
   // getColumns() { // ok!!!!
@@ -637,7 +712,6 @@ class GameField {
     });
   }
 
-
   fieldInit() {
     this.cells = [];
     for (let i = 0; i < this.lines; i++) {
@@ -649,23 +723,23 @@ class GameField {
         );
         cell.i = i;
         cell.k = k;
-        if (
-          //  (i === 0 &&
-          //   k === 3
-          //  )
-          //  ||
-          (i === 0 && k === 0) ||
-          (i === 0 && k === 1) ||
-          (i === 0 && k === 2) ||
-          (i === 0 && k === 3) ||
-          (i === 0 && k === 5) ||
-          (i === 1 && k === 0) ||
-          (i === 0 && k === 7) ||
-          (i === 0 && k === 6) ||
-          (i === 1 && k === 7)
-        ) {
-          cell.block = true;
-        }
+        // if (
+        //   //  (i === 0 &&
+        //   //   k === 3
+        //   //  )
+        //   //  ||
+        //   (i === 0 && k === 0) ||
+        //   (i === 0 && k === 1) ||
+        //   (i === 0 && k === 2) ||
+        //   (i === 0 && k === 3) ||
+        //   (i === 0 && k === 5) ||
+        //   (i === 1 && k === 0) ||
+        //   (i === 0 && k === 7) ||
+        //   (i === 0 && k === 6) ||
+        //   (i === 1 && k === 7)
+        // ) {
+        //   cell.block = true;
+        // }
         !i && !cell.block ? (cell.canBorn = true) : false;
         this.cells[i].push(cell);
         this.cellsArrey.push(cell);
@@ -703,18 +777,27 @@ class GameField {
     //     if (this.cells[i + 1] && this.cells[i + 1][k]) {
     //       cell.down = this.cells[i + 1][k];
     //     }
+
     //   })
+
     // );
+    // this.cellsArrey.forEach(cell => {
+    //   !cell.block &&  around.forEach(vector => {
+    //     if(!cell[vector] || cell[vector].block) {
+    //       cell.lines.push(fieldContur[vector])
+    //     }
+    //   })
+    // })
     ////////////////////////////////////////////////////////////////////////
     for (let i = 0; i < 1; i++) {
       const bI = Math.floor(Math.random() * this.lines);
       const bK = Math.floor(Math.random() * this.columns);
       const bCell = this.cells[bI][bK];
-     if(!bCell.block) {
-      const buster = new Item(bCell, busters);
-      buster.special = true;
-      bCell.item = buster;
-     }
+      if (!bCell.block) {
+        const buster = new Item(bCell, busters);
+        buster.special = true;
+        bCell.item = buster;
+      }
     }
     // console.log(buster.type);
     this.cells.forEach((line, i) => {
@@ -764,9 +847,17 @@ class GameField {
 
           !cell.item ? (cell.item = item) : false;
         }
+        !cell.block &&
+          around.forEach((vector) => {
+            if (!cell[vector] || cell[vector].block) {
+              ((!cell.i && vector !== "up") || cell.i) &&
+                cell.lines.push(fieldContur[vector]);
+            }
+          });
       });
     });
     //
+    console.log(this.cells);
   }
   getPotentialThree() {
     let variants = [];
@@ -807,5 +898,32 @@ class GameField {
       }
     }
     // console.log(variants);
+  }
+  debug() {
+    this.cellsArrey.forEach((cell) => {
+      const item = cell.item;
+      if (item && this.checkStatus === "checkLR") {
+        this.cellsArrey.forEach((controlCell) => {
+          const controlItem = controlCell.item;
+          if (controlItem && controlItem !== item) {
+            if (
+              item.y > 0 &&
+              controlItem.y > 0 &&
+              !(
+                Math.floor(item.x + item.width) <= Math.floor(controlItem.x) ||
+                Math.floor(item.x) >=
+                  Math.floor(controlItem.x + controlItem.width) ||
+                Math.floor(item.y) + Math.floor(item.height <= controlItem.y) ||
+                Math.floor(item.y) >=
+                  Math.floor(controlItem.y + controlItem.height)
+              )
+            ) {
+              pausa = true;
+              console.log("item : ", item, "controlItem : ", controlItem);
+            }
+          }
+        });
+      }
+    });
   }
 }

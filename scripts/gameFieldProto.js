@@ -5,7 +5,7 @@ GameField.prototype.itemsColumsMove = function () {
       item.x -= this.gabsrit / 3;
       if (item.x <= item.cell.x) {
         item.x = item.cell.x;
-       // this.itemsOnMove.push(item);
+        // this.itemsOnMove.push(item);
         item.awatMove = 3;
         //console.log(item.oldCell)
         item.oldCell.left.hold = false;
@@ -21,12 +21,12 @@ GameField.prototype.itemsColumsMove = function () {
       item.x += this.gabsrit / 3;
       if (item.x >= item.cell.x) {
         item.x = item.cell.x;
-      //  this.itemsOnMove.push(item);
+        //  this.itemsOnMove.push(item);
         item.awatMove = 3;
-        
+
         item.oldCell.column.needUpdate = false;
         item.oldCell.right.hold = false;
-      //  this.columnsUpdate(item.cell.column)
+        //  this.columnsUpdate(item.cell.column)
         this.columnsUpdate(item.oldCell.column);
         this.columnCellsOnMove.splice(i, 1);
         i--;
@@ -36,15 +36,10 @@ GameField.prototype.itemsColumsMove = function () {
 };
 
 GameField.prototype.leftRightUpdate = function () {
-  if (
-        this.checkStatus === 'checkLR' 
-      //  && !this.itemsOnMove.length
-  ) {
-
+  if (this.checkStatus === "checkLR" && this.userStop) {
     this.columnsArr.forEach((column, index) => {
       let ok = true;
-      let ok2 = true;
-     
+
       for (let i = 0; i < column.cells.length; i++) {
         const cell = column.cells[i];
         if (cell.item && cell.item.y !== cell.y) {
@@ -52,7 +47,6 @@ GameField.prototype.leftRightUpdate = function () {
           break;
         }
       }
-
 
       if (!column.needUpdate && ok) {
         for (let i = column.cells.length - 1; i >= 0; i--) {
@@ -66,7 +60,7 @@ GameField.prototype.leftRightUpdate = function () {
             leftCell &&
             !leftCell.block &&
             !leftCell.column.needUpdate &&
-           !leftCell.column.itemsOnMove.length &&
+            !leftCell.column.itemsOnMove.length &&
             !leftCell.item &&
             leftCell.down &&
             !leftCell.down.block &&
@@ -92,7 +86,7 @@ GameField.prototype.leftRightUpdate = function () {
             leftCell.hold = true;
             column.needUpdate = true;
             this.itemsOnMove.push(item);
-            leftCell.column.itemsOnMove.push(item)
+            leftCell.column.itemsOnMove.push(item);
             break;
           }
         }
@@ -101,7 +95,6 @@ GameField.prototype.leftRightUpdate = function () {
 
     this.columnsArr.forEach((column) => {
       let ok = true;
-      let ok2 = true;
 
       for (let i = 0; i < column.cells.length; i++) {
         const cell = column.cells[i];
@@ -110,8 +103,6 @@ GameField.prototype.leftRightUpdate = function () {
           break;
         }
       }
-
-
 
       if (!column.needUpdate && ok) {
         for (let i = column.cells.length - 1; i >= 0; i--) {
@@ -125,7 +116,7 @@ GameField.prototype.leftRightUpdate = function () {
             rightCell &&
             !rightCell.block &&
             !rightCell.column.needUpdate &&
-             !rightCell.column.itemsOnMove.length &&
+            !rightCell.column.itemsOnMove.length &&
             !rightCell.item &&
             rightCell.down &&
             !rightCell.down.block &&
@@ -150,7 +141,7 @@ GameField.prototype.leftRightUpdate = function () {
             item.oldCell = cell;
             column.needUpdate = true;
             this.itemsOnMove.push(item);
-            rightCell.column.itemsOnMove.push(item)
+            rightCell.column.itemsOnMove.push(item);
             break;
           }
         }
@@ -161,18 +152,48 @@ GameField.prototype.leftRightUpdate = function () {
       !this.itemsOnMove.length &&
       !this.onDestroy.length &&
       !this.drawAreaA.length &&
-     // !this.checkStatus &&
+      // !this.checkStatus &&
       !this.columnCellsOnMove.length &&
       !this.case
     ) {
-       console.log('HERE')
-      this.checkStatus = 'getThreeInLine'
-      this.userStop = false;
+      this.getGroops();
+      this.getThreeInLine();
+      // console.log("HERE");
+      if (this.threeInLine.length) {
+        this.checkStatus = "getThreeInLine";
+      } else {
+        this.checkStatus = "";
+        this.userStop = false;
+      }
     }
   }
 
- // console.log(this.userStop);
+  // console.log(this.userStop);
 };
+
+GameField.prototype.beamsOrder = function() {
+  for(let i = 0; i < this.beamsOnDraw.length; i++) {
+    const beam = this.beamsOnDraw[i];
+    beam.width += 10;
+    beam.height += 10;
+    if(beam.width >= 150) {
+      beam.width = 110;
+      beam.height = 110;
+    }
+  }
+}
+
+GameField.prototype.beamsDraw = function() {
+  for(let i = 0; i < this.beamsOnDraw.length; i++) {
+    const beam = this.beamsOnDraw[i];
+    ctx.drawImage(blueSpot, 0, 0, 1460, 1000,
+      (beam.cell.x + (beam.cell.width - beam.width) / 2) * (mas + booMas) + offsetX,
+      (beam.cell.y + (beam.cell.height - beam.height) / 2) * (mas + booMas) + offsetY,
+      beam.width * mas,
+      beam.height * mas
+      );
+  }
+}
 
 GameField.prototype.rocketsOrder = function () {
   for (let i = 0; i < this.rocketsOnDraw.length; i++) {

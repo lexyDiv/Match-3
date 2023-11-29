@@ -142,7 +142,10 @@ if(!pausa) {
  gameField.itemsMove();
  gameField.leftRightUpdate();
   gameField.rocketsOrder();
+  gameField.beamsOrder();
+ // gameField.debug(pausa); 
 }
+
 
   
   gameField.draw();
@@ -153,6 +156,7 @@ if(!pausa) {
   scorePoints.drawPieses();
   starsDraw();
   gameField.drawRockets();
+  gameField.beamsDraw();
 
   gameField.ticker++;
   gameField.ticker === 1000 ? (gameField.ticker = 0) : false;

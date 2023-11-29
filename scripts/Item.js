@@ -1,9 +1,9 @@
 const types = ["violet", "green", "red", "blue", "yellow"];
 const busters = [
   "hor",
- // "ver",
- // "around",
-  // "cross"
+  "ver",
+  "around",
+  // "cross",
 ];
 const around = ["left", "right", "up", "down"];
 let mas = 1;
@@ -40,6 +40,8 @@ class Item {
     this.pieseKoof = 0;
     this.outGab = 0;
     this.outTik = 0;
+    this.aWidth = Math.floor(Math.random() * 10) + 40;
+    this.aWidthStep = Math.floor(Math.random() * 2) ? 0.2 : -0.2;
   }
 
   booDraw() {
@@ -206,6 +208,23 @@ class Item {
         ctx.restore();
         gameField.ticker % 2 === 0 ? (this.aX += 100) : false;
         this.aX === 1600 ? (this.aX = 0) : false;
+      } else if (this.type === "cross") {
+        this.aWidth += this.aWidthStep;
+        this.aWidth <= 40 || this.aWidth >= 50
+          ? (this.aWidthStep = -this.aWidthStep)
+          : false;
+
+        ctx.drawImage(
+          violetCross,
+          0,
+          0,
+          568,
+          568,
+          (this.x - (this.aWidth - this.width) / 2) * (mas + booMas) + offsetX,
+          this.y * (mas + booMas) + offsetY,
+          this.aWidth * mas,
+          40 * mas
+        );
       }
       this.cell.focus = false;
       if (
